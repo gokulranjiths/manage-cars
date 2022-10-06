@@ -2,7 +2,10 @@ from fastapi import FastAPI, Query, Path, HTTPException, status, Body
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict
 from database import cars
-app= FastAPI()
+app= FastAPI(
+    title="Car Management",
+    version= "1.0",
+    description="""An application built with FastAPI python to maintain information about cars""")
 
 class Car(BaseModel):
     make: str
@@ -12,6 +15,16 @@ class Car(BaseModel):
     engine: Optional[str] = "V4"
     autonomous: bool
     sold: List[str]
+
+class UpdateCar(BaseModel):
+    id: int = Field(..., ge=0, lt=100)
+    make: Optional[str]
+    model: Optional[str]
+    year: Optional[int] = Field(ge= 1970, le= 2022)
+    price: Optional[float]
+    engine: Optional[str]
+    autonomous: Optional[bool]
+    sold: Optional[List[str]]
 
 
 @app.get("/")
@@ -52,5 +65,17 @@ def delete_cars(id: int =Path(..., ge=0, lt=100)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No car with this id")
     del cars[id]
 
+@app.put("/cars", status_code=status.HTTP_200_OK)
+def update_cars(body_cars: UpdateCar =Body(...)):
+    car_id=body_cars.id
+    car=cars.get(car_id)
+    if not car:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= "No Car with this id")
+    body_cars=body_cars.dict(exclude_unset=True)
+    print(body_cars)
+    car=dict(car)
+    for key in body_cars:
+        car[key]=body_cars[key]
+    cars[car_id]=car
 
 

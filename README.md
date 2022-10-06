@@ -10,6 +10,7 @@ An application built with _FastAPI python_ to maintain information about cars.
 - View list of available car information
 - Add car information 
 - Delete exisiting car information
+- Update exisiting car information
 
 
 ## To run the application
